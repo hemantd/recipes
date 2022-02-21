@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            border: 1px solid rgb(230, 115, 230);
+        }
+
+        td {
+            border: 1px solid rgb(115, 230, 230);
+        }
+
+        .td-neg {
+            color: white;
+            background-color: rgb(225, 108, 108);
+        }
+        .td-pos {
+            color: white;
+            background-color: rgb(108, 225, 108);
+        }
+    </style>
+    <script>
+
+        function decVal(fVal, iDecimalPoint){
+            let decPoint = 2;
+            if (iDecimalPoint !== undefined){
+                decPoint = iDecimalPoint;
+            }
+            try {
+                let retValue =  Number.parseFloat(fVal).toFixed(decPoint);
+                return retValue;
+            }
+            catch(e){
+                return 0;
+            }
+        }
+
+        function updLbl(){
+            let lblUpdSec = document.getElementById("lblUpdSec");
+            lblUpdSec.innerText = Number.parseInt(lblUpdSec.innerText) - 1;
+        }
+
+        let dataURL = "https://api.coincap.io/v2/assets";
+
+        function getData() {
+            fetch(dataURL)
+                .then(response => response.json()) // parse the JSON from the server
+                .then(tempData => {
+                    let tempDets = tempData.data;
+                    console.dir(tempDets);
+                    let dataTableBody = document.getElementById("tbData");
+                    while (dataTableBody.firstChild) {
+                        dataTableBody.removeChild(dataTableBody.firstChild);
+                    }
+                    Object.entries(tempDets).forEach(element => {
+                        console.log(element.flat().toString());
+                        let dataTR = document.createElement("tr");
+
+                        let dataTD1 = document.createElement("td");
+                        dataTD1.innerText = element[0];
+                        dataTR.appendChild(dataTD1);
+
+                        let dataTD2 = document.createElement("td");
+                        let fchngPcnt = decVal(element[1]["changePercent24Hr"]);
+                        dataTD2.innerText = fchngPcnt;
+                        if (fchngPcnt < 0){
+                            dataTD2.className = "td-neg";
+                        }
+                        if (fchngPcnt > 0){
+                            dataTD2.className = "td-pos";
+                        }                        
+                        dataTR.appendChild(dataTD2);
+
+                        let dataTD3 = document.createElement("td");
+                        let dataTD3Href = document.createElement("a");
+                        dataTD3Href.setAttribute("href", element[1]["explorer"]);
+                        dataTD3Href.innerText = "Link";
+                        dataTD3Href.target = "_blank";
+                        dataTD3.appendChild(dataTD3Href);
+                        dataTR.appendChild(dataTD3);
+
+                        let dataTD4 = document.createElement("td");
+                        dataTD4.innerText = element[1]["id"];
+                        dataTR.appendChild(dataTD4);
+
+                        let dataTD5 = document.createElement("td");
+
+                        dataTD5.innerText = decVal(element[1]["marketCapUsd"]);
+                        dataTR.appendChild(dataTD5);
+
+                        let dataTD6 = document.createElement("td");
+                        dataTD6.innerText = decVal(element[1]["maxSupply"]);
+                        dataTR.appendChild(dataTD6);
+
+                        let dataTD7 = document.createElement("td");
+                        dataTD7.innerText = element[1]["name"];
+                        dataTR.appendChild(dataTD7);
+
+                        let dataTD8 = document.createElement("td");
+                        dataTD8.innerText = decVal(element[1]["priceUsd"]);
+                        dataTR.appendChild(dataTD8);
+
+                        let dataTD9 = document.createElement("td");
+                        dataTD9.innerText = element[1]["rank"];
+                        dataTR.appendChild(dataTD9);
+
+                        let dataTD10 = document.createElement("td");
+                        dataTD10.innerText = decVal(element[1]["supply"]);
+                        dataTR.appendChild(dataTD10);
+
+                        let dataTD11 = document.createElement("td");
+                        dataTD11.innerText = element[1]["symbol"];
+                        dataTR.appendChild(dataTD11);
+
+                        let dataTD12 = document.createElement("td");
+                        dataTD12.innerText = decVal(element[1]["volumeUsd24Hr"],4);
+                        dataTR.appendChild(dataTD12);
+
+                        let dataTD13 = document.createElement("td");
+                        dataTD13.innerText = decVal(element[1]["vwap24Hr"]);
+                        dataTR.appendChild(dataTD13);
+
+                        dataTableBody.appendChild(dataTR);
+
+                        let lblUpdSec = document.getElementById("lblUpdSec");
+                        lblUpdSec.innerText = 60;
+
+//                        tempLI.innerHTML = element.flat().toString();
+
+                    });
+                });
+        }
+
+    </script>
+    <title>Coinbase API</title>
+</head>
+
+<body>
+  <a href="index.html"> Home </a>
+    <h3><i>Thank you <a href="coincap.io"> CoinCap </a> for the data !!</i></h3>
+    <i>Data refreshes every minute, next refresh in </i> <label id="lblUpdSec"></label> <i>seconds</i>
+    <table>
+        <thead>
+            <tr>
+                <td>
+                    #
+                </td>
+                <td>
+                    changePercent24Hr
+                </td>
+                <td>
+                    explorer
+                </td>
+                <td>
+                    id
+                </td>
+                <td>
+                    marketCapUsd
+                </td>
+                <td>
+                    maxSupply
+                </td>
+                <td>
+                    name
+                </td>
+                <td>
+                    priceUsd
+                </td>
+                <td>
+                    rank
+                </td>
+                <td>
+                    supply
+                </td>
+                <td>
+                    symbol
+                </td>
+                <td>
+                    volumeUsd24Hr
+                </td>
+                <td>
+                    vwap24Hr
+                </td>
+            </tr>
+        </thead>
+        <tbody id="tbData">
+
+        </tbody>
+    </table>
+</body>
+<script>
+    getData();
+    setInterval(getData, 60000);
+    setInterval(updLbl, 1000);
+
+</script>
+
+</html>
